@@ -1,0 +1,2877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Hub</title>
+    <style>
+        /* Hub Styling */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #1e1e1e;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 10;
+            /* Smooth transitions for retraction */
+            transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease, border-bottom-color 0.4s ease;
+            max-height: 100px;
+            opacity: 1;
+            /* FIX: Changed from hidden to visible so the dropdown can drop down */
+            overflow: visible; 
+        }
+
+        /* Retracted state class */
+        header.retracted {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            opacity: 0;
+            border-bottom-color: transparent;
+            box-shadow: none;
+            /* FIX: Only hide overflow when actually retracted */
+            overflow: hidden; 
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            margin-right: auto;
+            color: #e0e0e0;
+            letter-spacing: 1px;
+        }
+
+        button {
+            background-color: #2d2d2d;
+            color: #b0b0b0;
+            border: 1px solid #444;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #3d3d3d;
+            color: #ffffff;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.active {
+            background-color: #007bff;
+            color: #ffffff;
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+        }
+
+        /* --- Dropdown Styling --- */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1e1e1e;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            z-index: 20;
+            border-radius: 6px;
+            margin-top: 5px;
+            border: 1px solid #333;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .dropdown-content button {
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-radius: 0;
+            background-color: transparent;
+            padding: 12px 20px;
+            margin: 0;
+            box-shadow: none;
+        }
+
+        .dropdown-content button:hover, .dropdown-content button.active {
+            background-color: #333;
+            color: #007bff;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: flex;
+        }
+
+        iframe {
+            flex-grow: 1;
+            border: none;
+            width: 100%;
+            background-color: #0c0b18; 
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>My Web Apps</h1>
+        <button id="btn-home" class="active" onclick="loadApp('home', this)">Home</button>
+        <button id="btn-music" onclick="loadApp('music', this)">Music Player</button>
+        
+        <div class="dropdown">
+            <button class="dropbtn" id="btn-games-dropdown">Games</button>
+            <div class="dropdown-content">
+                <button id="btn-piano" onclick="loadApp('piano', this)">Piano Game</button>
+                <button id="btn-tetris" onclick="loadApp('tetris', this)">Tetris</button>
+                <button id="btn-snake" onclick="loadApp('snake', this)">Snake Game</button>
+            </div>
+        </div>
+
+        <button id="btn-opm" onclick="loadApp('opm', this)">OPM Unit Search</button>
+        <button id="btn-quickref" onclick="loadApp('quickref', this)">Quick Reference</button>
+        <button id="btn-screensaver" onclick="loadApp('screensaver', this)">Screen Saver</button>
+    </header>
+
+    <iframe id="app-frame" title="Application Viewer"></iframe>
+
+    <textarea id="code-home" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body { 
+            margin: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+            height: 100vh; background-color: #121212; 
+            color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+        }
+        h1 { color: #007bff; font-size: 3rem; margin-bottom: 10px; }
+        p { color: #888; font-size: 1.2rem; }
+        .icon { font-size: 4rem; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="icon">🚀</div>
+    <h1>Welcome Home</h1>
+    <p>Select a program from the top navigation bar to launch it.</p>
+</body>
+</html>
+    </textarea>
+
+    <textarea id="code-music" style="display:none;">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WaveAmp Player</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-dark: #0a0e0a;
+    --bg-panel: #111811;
+    --bg-control: #1a221a;
+    --bg-display: #0d1a0d;
+    --green-bright: #33ff55;
+    --green-mid: #22cc44;
+    --green-dim: #0d4a1a;
+    --green-glow: rgba(51,255,85,0.15);
+    --amber: #ffaa00;
+    --amber-dim: #5a3a00;
+    --border: #1e2e1e;
+    --border-bright: #2a4a2a;
+    --text-dim: #1a6a2a;
+    --playlist-bg: #090d09;
+    --playlist-item: #111811;
+    --playlist-hover: #162016;
+    --playlist-active: #0d2a15;
+    --scrollbar: #1a2e1a;
+  }
+
+  body {
+    background: #060a06;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--green-bright);
+  }
+
+  .player-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 420px;
+    user-select: none;
+  }
+
+  /* ── TITLEBAR ── */
+  .titlebar {
+    background: linear-gradient(to right, #0a1a0a, #1a2e1a, #0a1a0a);
+    border: 1px solid var(--border-bright);
+    border-bottom: none;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--green-mid);
+    cursor: move;
+  }
+
+  .titlebar-dots { display: flex; gap: 5px; }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid #2a4a2a;
+    background: var(--bg-dark);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .dot:hover { background: var(--green-dim); }
+  .dot.red:hover { background: #4a1010; }
+
+  /* ── MAIN DISPLAY ── */
+  .display-panel {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-bright);
+    border-bottom: none;
+    padding: 12px 14px 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .display-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0,20,0,0.3) 3px,
+      rgba(0,20,0,0.3) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .status-badge {
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 2px 6px;
+    border: 1px solid var(--green-dim);
+    color: var(--text-dim);
+    font-family: 'Orbitron', monospace;
+    transition: all 0.3s;
+  }
+  .status-badge.active {
+    color: var(--green-bright);
+    border-color: var(--green-mid);
+    text-shadow: 0 0 8px var(--green-bright);
+  }
+
+  .time-display {
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--green-bright);
+    text-shadow: 0 0 10px var(--green-bright), 0 0 20px rgba(51,255,85,0.3);
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    position: relative;
+    z-index: 2;
+  }
+
+  .song-marquee-wrap {
+    overflow: hidden;
+    border: 1px solid var(--green-dim);
+    background: var(--bg-display);
+    padding: 4px 8px;
+    margin: 8px 0 6px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .song-marquee {
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--green-bright);
+    text-shadow: 0 0 6px var(--green-bright);
+    letter-spacing: 1px;
+    animation: marquee 12s linear infinite;
+    display: inline-block;
+  }
+
+  .song-marquee.short { animation: none; }
+
+  @keyframes marquee {
+    0%   { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-dim);
+    position: relative;
+    z-index: 2;
+    letter-spacing: 1px;
+  }
+
+  /* ── SEEK BAR ── */
+  .seek-section {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-bright);
+    border-bottom: none;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .seek-label { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; min-width: 30px; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 6px;
+    background: var(--bg-control);
+    border: 1px solid var(--green-dim);
+    border-radius: 0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--green-bright);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    box-shadow: 0 0 6px var(--green-bright);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    background: var(--green-bright);
+    border: none; border-radius: 0;
+    cursor: pointer;
+  }
+  input[type=range].volume-slider { flex: none; width: 80px; }
+
+  /* ── CONTROLS ── */
+  .controls-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-bright);
+    border-bottom: none;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .main-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px; /* Reduced gap to fit all buttons */
+  }
+
+  .ctrl-btn {
+    background: var(--bg-control);
+    border: 1px solid var(--border-bright);
+    color: var(--green-mid);
+    font-size: 16px; /* Slightly smaller to fit */
+    cursor: pointer;
+    padding: 0;
+    width: 36px; /* Reduced width */
+    height: 34px; /* Reduced height */
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .ctrl-btn:hover {
+    background: var(--green-glow);
+    color: var(--green-bright);
+    border-color: var(--green-mid);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .ctrl-btn:active { transform: scale(0.93); }
+  .ctrl-btn.wide { width: 54px; font-size: 12px; letter-spacing: 1px; } /* Reduced wide button size */
+  .ctrl-btn.play-btn { width: 48px; height: 40px; font-size: 20px; background: var(--bg-dark); } /* Adjusted play button size */
+
+  .ctrl-btn.active {
+    color: var(--amber);
+    border-color: var(--amber-dim);
+    text-shadow: 0 0 8px var(--amber);
+  }
+
+  .vol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .vol-icon { font-size: 14px; color: var(--green-dim); }
+
+  /* ── VU METER ── */
+  .vu-meter {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 20px;
+  }
+
+  .vu-bar {
+    width: 4px;
+    background: var(--green-dim);
+    border-radius: 0;
+    transition: height 0.05s ease-out;
+    min-height: 2px;
+  }
+
+  /* ── PLAYLIST PANEL ── */
+  .playlist-panel {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-bright);
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .playlist-header {
+    background: linear-gradient(to right, #0a1a0a, #162416, #0a1a0a);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--green-mid);
+  }
+
+  .playlist-actions { display: flex; gap: 4px; }
+
+  .pl-btn {
+    background: var(--bg-control);
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 3px 7px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    transition: all 0.15s;
+  }
+
+  .pl-btn:hover {
+    color: var(--green-bright);
+    border-color: var(--green-mid);
+    background: var(--green-glow);
+  }
+
+  .pl-btn.accent {
+    color: var(--amber);
+    border-color: var(--amber-dim);
+  }
+  .pl-btn.accent:hover { background: rgba(255,170,0,0.1); border-color: var(--amber); }
+
+  .playlist-list {
+    height: 400px; /* INCREASED HEIGHT to show more songs */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--green-dim) var(--bg-dark);
+  }
+  .playlist-list::-webkit-scrollbar { width: 6px; }
+  .playlist-list::-webkit-scrollbar-track { background: var(--bg-dark); }
+  .playlist-list::-webkit-scrollbar-thumb { background: var(--green-dim); }
+
+  .pl-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 8px;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  .pl-empty-icon { font-size: 32px; opacity: 0.4; }
+
+  .pl-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-bottom: 1px solid rgba(20,40,20,0.5);
+    cursor: pointer;
+    transition: background 0.1s;
+    font-size: 11px;
+    color: var(--green-mid);
+    letter-spacing: 0.5px;
+  }
+  .pl-item:hover { background: var(--playlist-hover); }
+  .pl-item.current { background: var(--playlist-active); color: var(--green-bright); }
+  .pl-item.current .pl-num { color: var(--amber); text-shadow: 0 0 6px var(--amber); }
+  .pl-item.playing .pl-num::after { content: '▶'; }
+
+  .pl-num { min-width: 24px; color: var(--text-dim); font-size: 10px; }
+  .pl-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pl-dur { color: var(--text-dim); font-size: 10px; flex-shrink: 0; }
+  .pl-del {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 2px;
+    visibility: hidden;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .pl-item:hover .pl-del { visibility: visible; }
+  .pl-del:hover { color: #ff4444; }
+
+  /* ── BOTTOM BAR ── */
+  .bottom-bar {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-bright);
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    font-family: 'Orbitron', monospace;
+  }
+
+  .equalizer-bars { display: flex; gap: 2px; align-items: flex-end; height: 12px; }
+  .eq-bar { width: 3px; background: var(--green-dim); border-radius: 0; }
+
+  /* ── HIDDEN INPUT ── */
+  #folderInput { display: none; }
+  #savedInput  { display: none; }
+
+  /* ── SAVE MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,10,0,0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-bright);
+    padding: 20px;
+    width: 300px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--green-mid);
+    margin-bottom: 14px;
+  }
+
+  .modal input[type=text] {
+    width: 100%;
+    background: var(--bg-display);
+    border: 1px solid var(--green-dim);
+    color: var(--green-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    padding: 7px 10px;
+    outline: none;
+    letter-spacing: 1px;
+  }
+  .modal input[type=text]:focus { border-color: var(--green-mid); }
+
+  .modal-btns { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+
+  .scan-info {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="player-wrapper">
+
+  <div class="titlebar">
+    <span>WAVEAMP 1.0</span>
+    <div class="titlebar-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot red"></div>
+    </div>
+  </div>
+
+  <div class="display-panel">
+    <div class="status-row">
+      <span class="status-badge" id="statusBadge">STOPPED</span>
+      <div class="vu-meter" id="vuMeter">
+        <div class="vu-bar" style="height:3px"></div>
+        <div class="vu-bar" style="height:3px"></div>
+        <div class="vu-bar" style="height:3px"></div>
+        <div class="vu-bar" style="height:3px"></div>
+        <div class="vu-bar" style="height:3px"></div>
+        <div class="vu-bar" style="height:3px"></div>
+        <div class="vu-bar" style="height:3px"></div>
+        <div class="vu-bar" style="height:3px"></div>
+      </div>
+      <span class="time-display" id="timeDisplay">00:00</span>
+    </div>
+
+    <div class="song-marquee-wrap">
+      <span class="song-marquee short" id="songMarquee">── NO TRACK LOADED ──</span>
+    </div>
+
+    <div class="meta-row">
+      <span id="trackInfo">TRACK — / —</span>
+      <span id="bitrateInfo">— kHz</span>
+    </div>
+  </div>
+
+  <div class="seek-section">
+    <span class="seek-label" id="seekLeft">0:00</span>
+    <input type="range" id="seekBar" min="0" max="1000" value="0">
+    <span class="seek-label" id="seekRight">0:00</span>
+  </div>
+
+  <div class="controls-panel">
+    <div class="main-controls">
+      <button class="ctrl-btn" id="btnPrev"    title="Previous">⏮</button>
+      <button class="ctrl-btn" id="btnRew"     title="Rewind">⏪</button>
+      <button class="ctrl-btn play-btn" id="btnPlay" title="Play/Pause">▶</button>
+      <button class="ctrl-btn" id="btnFwd"     title="Fast Forward">⏩</button>
+      <button class="ctrl-btn" id="btnNext"    title="Next">⏭</button>
+      <button class="ctrl-btn" id="btnStop"    title="Stop">⏹</button>
+      <button class="ctrl-btn wide" id="btnShuffle" title="Shuffle">⤢ SHF</button>
+      <button class="ctrl-btn wide" id="btnRepeat"  title="Repeat">↻ RPT</button>
+    </div>
+
+    <div class="vol-row">
+      <span class="vol-icon">🔈</span>
+      <input type="range" class="volume-slider" id="volSlider" min="0" max="100" value="80">
+      <span class="vol-icon">🔊</span>
+      <span id="volVal" style="font-size:10px;color:var(--text-dim);margin-left:4px;">80%</span>
+    </div>
+  </div>
+
+  <div class="playlist-panel">
+    <div class="playlist-header">
+      <span>PLAYLIST</span>
+      <div class="playlist-actions">
+        <button class="pl-btn" onclick="document.getElementById('folderInput').click()">+ FOLDER</button>
+        <button class="pl-btn" onclick="showSaveModal()">SAVE</button>
+        <button class="pl-btn" onclick="document.getElementById('savedInput').click()">LOAD</button>
+        <button class="pl-btn" onclick="clearPlaylist()">CLEAR</button>
+      </div>
+    </div>
+    <div class="playlist-list" id="playlistList">
+      <div class="pl-empty" id="emptyMsg">
+        <div class="pl-empty-icon">🎵</div>
+        <span>CLICK + FOLDER TO ADD MUSIC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <span id="plCount">0 TRACKS</span>
+    <div class="equalizer-bars" id="eqBars">
+      <div class="eq-bar" style="height:8px"></div>
+      <div class="eq-bar" style="height:5px"></div>
+      <div class="eq-bar" style="height:10px"></div>
+      <div class="eq-bar" style="height:4px"></div>
+      <div class="eq-bar" style="height:9px"></div>
+    </div>
+    <span id="plDuration">0:00 TOTAL</span>
+  </div>
+
+</div>
+
+<input type="file" id="folderInput" webkitdirectory multiple accept="audio/*">
+<input type="file" id="savedInput" accept=".json">
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">SAVE PLAYLIST</div>
+    <input type="text" id="playlistName" placeholder="My Playlist" maxlength="40">
+    <div class="scan-info" id="modalInfo"></div>
+    <div class="modal-btns">
+      <button class="pl-btn" onclick="closeModal()">CANCEL</button>
+      <button class="pl-btn accent" onclick="savePlaylist()">SAVE .JSON</button>
+    </div>
+  </div>
+</div>
+
+<audio id="audioEl"></audio>
+
+<script>
+const audio     = document.getElementById('audioEl');
+const seekBar   = document.getElementById('seekBar');
+const volSlider = document.getElementById('volSlider');
+const songMarquee   = document.getElementById('songMarquee');
+const timeDisplay   = document.getElementById('timeDisplay');
+const statusBadge   = document.getElementById('statusBadge');
+const trackInfo     = document.getElementById('trackInfo');
+const bitrateInfo   = document.getElementById('bitrateInfo');
+const seekLeft      = document.getElementById('seekLeft');
+const seekRight     = document.getElementById('seekRight');
+const playlistList  = document.getElementById('playlistList');
+const emptyMsg      = document.getElementById('emptyMsg');
+const plCount       = document.getElementById('plCount');
+const plDuration    = document.getElementById('plDuration');
+const volVal        = document.getElementById('volVal');
+const vuMeter       = document.getElementById('vuMeter');
+const vuBars        = vuMeter.querySelectorAll('.vu-bar');
+const eqBars        = document.getElementById('eqBars').querySelectorAll('.eq-bar');
+
+let playlist    = [];
+let currentIdx  = -1;
+let isPlaying   = false;
+let isShuffle   = false;
+let isRepeat    = false;
+let isSeeking   = false;
+let currentFile = null;
+let vuInterval  = null;
+let eqInterval  = null;
+let objectURLs  = {};
+
+const fmt = s => {
+  s = Math.max(0, Math.floor(s || 0));
+  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+};
+
+// ── VU METER ──
+function startVU() {
+  if (vuInterval) return;
+  vuInterval = setInterval(() => {
+    vuBars.forEach(b => {
+      const h = isPlaying ? Math.floor(Math.random()*18)+2 : 2;
+      b.style.height = h + 'px';
+      b.style.background = h > 14 ? '#ffaa00' : h > 10 ? '#22cc44' : 'var(--green-dim)';
+    });
+  }, 80);
+  eqInterval = setInterval(() => {
+    eqBars.forEach(b => {
+      const h = isPlaying ? Math.floor(Math.random()*10)+2 : Math.floor(Math.random()*3)+1;
+      b.style.height = h+'px';
+      b.style.background = isPlaying ? 'var(--green-mid)' : 'var(--green-dim)';
+    });
+  }, 120);
+}
+function stopVU() {
+  vuBars.forEach(b => { b.style.height='2px'; b.style.background='var(--green-dim)'; });
+}
+
+// ── MARQUEE ──
+function setMarquee(name) {
+  songMarquee.textContent = name || '── NO TRACK LOADED ──';
+  const wrap = songMarquee.parentElement;
+  songMarquee.classList.toggle('short', songMarquee.scrollWidth <= wrap.clientWidth + 10);
+}
+
+// ── LOAD TRACK ──
+function loadTrack(idx, autoplay) {
+  if (idx < 0 || idx >= playlist.length) return;
+  currentIdx = idx;
+  const track = playlist[idx];
+
+  if (currentFile) { URL.revokeObjectURL(currentFile); currentFile = null; }
+
+  if (track.url) {
+    audio.src = track.url;
+    currentFile = null;
+  } else if (track.file) {
+    const url = URL.createObjectURL(track.file);
+    audio.src = url;
+    currentFile = url;
+  } else {
+    setMarquee('── FILE NOT AVAILABLE ──');
+    return;
+  }
+
+  audio.volume = volSlider.value / 100;
+  setMarquee(track.name);
+  updateTrackInfo();
+  renderPlaylist();
+
+  if (autoplay) { audio.play().catch(()=>{}); }
+}
+
+function updateTrackInfo() {
+  const t = playlist[currentIdx];
+  if (!t) return;
+  trackInfo.textContent = `TRACK ${currentIdx+1} / ${playlist.length}`;
+  const ext = t.name.split('.').pop().toUpperCase();
+  bitrateInfo.textContent = ext + ' AUDIO';
+}
+
+// ── PLAY / PAUSE / STOP ──
+const btnPlay = document.getElementById('btnPlay');
+const btnStop = document.getElementById('btnStop');
+
+function playPause() {
+  if (!playlist.length) return;
+  if (currentIdx < 0) { loadTrack(0, true); return; }
+  if (isPlaying) {
+    audio.pause();
+  } else {
+    audio.play().catch(()=>{});
+  }
+}
+
+btnPlay.onclick = playPause;
+btnStop.onclick = () => {
+  audio.pause();
+  audio.currentTime = 0;
+  seekBar.value = 0;
+  seekLeft.textContent = '0:00';
+  timeDisplay.textContent = '00:00';
+};
+
+// ── PREV / NEXT ──
+document.getElementById('btnPrev').onclick = () => {
+  if (!playlist.length) return;
+  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+  let idx = isShuffle
+    ? Math.floor(Math.random() * playlist.length)
+    : (currentIdx - 1 + playlist.length) % playlist.length;
+  loadTrack(idx, isPlaying);
+};
+
+document.getElementById('btnNext').onclick = nextTrack;
+
+function nextTrack() {
+  if (!playlist.length) return;
+  if (isRepeat) { audio.currentTime = 0; if (isPlaying) audio.play().catch(()=>{}); return; }
+  let idx = isShuffle
+    ? Math.floor(Math.random() * playlist.length)
+    : (currentIdx + 1) % playlist.length;
+  loadTrack(idx, true);
+}
+
+// ── REW / FFW ──
+document.getElementById('btnRew').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 10); };
+document.getElementById('btnFwd').onclick = () => { audio.currentTime = Math.min(audio.duration||0, audio.currentTime + 10); };
+
+// ── SHUFFLE / REPEAT ──
+const btnShuffle = document.getElementById('btnShuffle');
+const btnRepeat  = document.getElementById('btnRepeat');
+btnShuffle.onclick = () => { isShuffle = !isShuffle; btnShuffle.classList.toggle('active', isShuffle); };
+btnRepeat.onclick  = () => { isRepeat  = !isRepeat;  btnRepeat.classList.toggle('active', isRepeat);  };
+
+// ── SEEK ──
+seekBar.addEventListener('mousedown', () => isSeeking = true);
+seekBar.addEventListener('touchstart', () => isSeeking = true);
+seekBar.addEventListener('input', () => {
+  if (!audio.duration) return;
+  const t = (seekBar.value / 1000) * audio.duration;
+  seekLeft.textContent = fmt(t);
+  timeDisplay.textContent = fmt(t).replace(':','∶');
+});
+seekBar.addEventListener('change', () => {
+  if (!audio.duration) return;
+  audio.currentTime = (seekBar.value / 1000) * audio.duration;
+  isSeeking = false;
+});
+
+// ── VOLUME ──
+volSlider.addEventListener('input', () => {
+  audio.volume = volSlider.value / 100;
+  volVal.textContent = volSlider.value + '%';
+});
+
+// ── AUDIO EVENTS ──
+audio.addEventListener('play', () => {
+  isPlaying = true;
+  btnPlay.textContent = '⏸';
+  statusBadge.textContent = 'PLAYING';
+  statusBadge.classList.add('active');
+  startVU();
+});
+
+audio.addEventListener('pause', () => {
+  isPlaying = false;
+  btnPlay.textContent = '▶';
+  statusBadge.textContent = audio.currentTime > 0 ? 'PAUSED' : 'STOPPED';
+  statusBadge.classList.toggle('active', false);
+  stopVU();
+});
+
+audio.addEventListener('ended', nextTrack);
+
+audio.addEventListener('timeupdate', () => {
+  if (isSeeking || !audio.duration) return;
+  const pct = audio.currentTime / audio.duration;
+  seekBar.value = pct * 1000;
+  seekLeft.textContent = fmt(audio.currentTime);
+  seekRight.textContent = fmt(audio.duration - audio.currentTime);
+  const t = fmt(audio.currentTime);
+  timeDisplay.textContent = t;
+});
+
+audio.addEventListener('loadedmetadata', () => {
+  seekRight.textContent = fmt(audio.duration);
+  updatePlaylistDuration();
+});
+
+// ── PLAYLIST RENDER ──
+function renderPlaylist() {
+  if (!playlist.length) {
+    playlistList.innerHTML = '';
+    playlistList.appendChild(emptyMsg);
+    emptyMsg.style.display = 'flex';
+    plCount.textContent = '0 TRACKS';
+    plDuration.textContent = '0:00 TOTAL';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+
+  const html = playlist.map((t, i) => `
+    <div class="pl-item ${i===currentIdx?'current':''}" onclick="plClick(${i})">
+      <span class="pl-num">${i===currentIdx && isPlaying ? '▶' : (i+1)}</span>
+      <span class="pl-name" title="${t.name}">${t.name.replace(/\.[^.]+$/,'')}</span>
+      <span class="pl-dur">${t.duration || '—'}</span>
+      <span class="pl-del" onclick="event.stopPropagation();removePl(${i})">✕</span>
+    </div>`).join('');
+
+  playlistList.innerHTML = html;
+  plCount.textContent = `${playlist.length} TRACK${playlist.length!==1?'S':''}`;
+
+  const el = playlistList.querySelector('.current');
+  if (el) el.scrollIntoView({ block:'nearest' });
+}
+
+function plClick(i) {
+  if (i === currentIdx) { playPause(); }
+  else { loadTrack(i, true); }
+}
+
+function removePl(i) {
+  if (objectURLs[i]) { URL.revokeObjectURL(objectURLs[i]); delete objectURLs[i]; }
+  playlist.splice(i, 1);
+  if (i < currentIdx) currentIdx--;
+  else if (i === currentIdx) {
+    audio.pause(); audio.src = '';
+    isPlaying = false; currentIdx = -1;
+    setMarquee('── NO TRACK LOADED ──');
+    statusBadge.textContent = 'STOPPED';
+    statusBadge.classList.remove('active');
+    stopVU();
+  }
+  renderPlaylist();
+  updatePlaylistDuration();
+}
+
+function clearPlaylist() {
+  audio.pause(); audio.src = '';
+  isPlaying = false; currentIdx = -1;
+  playlist = [];
+  setMarquee('── NO TRACK LOADED ──');
+  statusBadge.textContent = 'STOPPED';
+  statusBadge.classList.remove('active');
+  trackInfo.textContent = 'TRACK — / —';
+  bitrateInfo.textContent = '— kHz';
+  timeDisplay.textContent = '00:00';
+  seekBar.value = 0;
+  seekLeft.textContent = '0:00';
+  seekRight.textContent = '0:00';
+  stopVU();
+  renderPlaylist();
+}
+
+function updatePlaylistDuration() {
+  let total = playlist.reduce((s,t) => s + (t.durationSec || 0), 0);
+  plDuration.textContent = `${fmt(total)} TOTAL`;
+}
+
+// ── FOLDER LOAD ──
+document.getElementById('folderInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files).filter(f => f.type.startsWith('audio/'));
+  files.sort((a,b) => a.name.localeCompare(b.name));
+
+  for (const f of files) {
+    const track = { name: f.name, file: f, durationSec: 0, duration: '—' };
+    playlist.push(track);
+    const idx = playlist.length - 1;
+    const url = URL.createObjectURL(f);
+    const tmpAudio = new Audio(url);
+    tmpAudio.addEventListener('loadedmetadata', () => {
+      track.durationSec = tmpAudio.duration;
+      track.duration = fmt(tmpAudio.duration);
+      URL.revokeObjectURL(url);
+      renderPlaylist();
+      updatePlaylistDuration();
+    }, {once: true});
+  }
+
+  renderPlaylist();
+  e.target.value = '';
+});
+
+// ── SAVE PLAYLIST ──
+function showSaveModal() {
+  if (!playlist.length) { alert('Playlist is empty!'); return; }
+  document.getElementById('modalInfo').textContent = `${playlist.length} track(s) will be saved.`;
+  document.getElementById('playlistName').value = 'My Playlist';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+function savePlaylist() {
+  const name = document.getElementById('playlistName').value.trim() || 'My Playlist';
+  const data = {
+    name,
+    created: new Date().toISOString(),
+    tracks: playlist.map(t => ({
+      name: t.name,
+      duration: t.duration,
+      durationSec: t.durationSec
+    }))
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = name.replace(/\s+/g,'_') + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  closeModal();
+}
+
+// ── LOAD SAVED PLAYLIST ──
+document.getElementById('savedInput').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const text = await f.text();
+    const data = JSON.parse(text);
+    if (!data.tracks) throw new Error('Invalid playlist file');
+    playlist = data.tracks.map(t => ({ name: t.name, duration: t.duration, durationSec: t.durationSec || 0 }));
+    currentIdx = -1;
+    setMarquee('── PLAYLIST LOADED — ADD FOLDER TO PLAY ──');
+    renderPlaylist();
+    updatePlaylistDuration();
+    alert(`Loaded "${data.name}" — ${playlist.length} tracks.\n\nNote: Re-add the folder to enable playback.`);
+  } catch { alert('Could not read playlist file.'); }
+  e.target.value = '';
+});
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space')      { e.preventDefault(); playPause(); }
+  if (e.code === 'ArrowRight') { document.getElementById('btnNext').click(); }
+  if (e.code === 'ArrowLeft')  { document.getElementById('btnPrev').click(); }
+  if (e.code === 'ArrowUp')    { volSlider.value = Math.min(100,+volSlider.value+5); volSlider.dispatchEvent(new Event('input')); }
+  if (e.code === 'ArrowDown')  { volSlider.value = Math.max(0,+volSlider.value-5);  volSlider.dispatchEvent(new Event('input')); }
+});
+
+// Close modal on overlay click
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+startVU();
+renderPlaylist();
+</script>
+</body>
+</html>
+    </textarea>
+
+    <textarea id="code-piano" style="display:none;">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piano Note Reader</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0c0b18;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      gap: 1.2rem;
+      font-family: Palatino, "Book Antiqua", Georgia, serif;
+      color: #e8d9b5;
+      box-sizing: border-box;
+    }
+    
+    /* Animations */
+    @keyframes ni { from { opacity: 0; transform: scale(0.3) translateY(-12px); } to { opacity: 1; transform: none; } }
+    @keyframes nf { to { transform: translateY(210px); opacity: 0; } }
+    @keyframes nb { 0% { transform: none; opacity: 1; } 40% { transform: scale(1.4); opacity: .8; } 100% { transform: scale(0.05) rotate(30deg); opacity: 0; } }
+    @keyframes fy0 { to { transform: translate(52px, 0); opacity: 0; } }
+    @keyframes fy1 { to { transform: translate(37px, -37px); opacity: 0; } }
+    @keyframes fy2 { to { transform: translate(0, -52px); opacity: 0; } }
+    @keyframes fy3 { to { transform: translate(-37px, -37px); opacity: 0; } }
+    @keyframes fy4 { to { transform: translate(-52px, 0); opacity: 0; } }
+    @keyframes fy5 { to { transform: translate(-37px, 37px); opacity: 0; } }
+    @keyframes fy6 { to { transform: translate(0, 52px); opacity: 0; } }
+    @keyframes fy7 { to { transform: translate(37px, 37px); opacity: 0; } }
+    .ni { animation: ni .3s cubic-bezier(.34, 1.56, .64, 1) both; }
+    .nf { animation: nf .65s cubic-bezier(.4, 0, 1, 1) forwards; }
+    .nb { animation: nb .4s ease-out forwards; }
+    .fp { animation-duration: .55s; animation-timing-function: ease-out; animation-fill-mode: forwards; }
+    .fp0 { animation-name: fy0; } .fp1 { animation-name: fy1; } .fp2 { animation-name: fy2; } .fp3 { animation-name: fy3; }
+    .fp4 { animation-name: fy4; } .fp5 { animation-name: fy5; } .fp6 { animation-name: fy6; } .fp7 { animation-name: fy7; }
+    
+    @keyframes scoreIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .scoreIn { animation: scoreIn .3s ease-out both; }
+
+    /* UI Elements */
+    .diff-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: -10px;
+    }
+
+    .diff-btn {
+      background: transparent;
+      border: 1px solid #6b5a3a;
+      color: #9a8070;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .diff-btn.active {
+      background: #6b5a3a;
+      color: #f5f0e4;
+      border-color: #f5f0e4;
+    }
+
+    .staff-container {
+      background: #f5f0e4;
+      border-radius: 10px;
+      padding: 4px 12px;
+      box-shadow: 0 10px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    
+    .piano-wrapper {
+      width: 100%;
+      max-width: 95vw;
+      overflow-x: auto;
+      border-radius: 9px;
+      padding-bottom: 10px;
+      scroll-behavior: smooth;
+    }
+    
+    /* Custom Scrollbar for the keyboard wrapper */
+    .piano-wrapper::-webkit-scrollbar {
+      height: 8px;
+    }
+    .piano-wrapper::-webkit-scrollbar-track {
+      background: #17101f; 
+      border-radius: 4px;
+    }
+    .piano-wrapper::-webkit-scrollbar-thumb {
+      background: #4a3520; 
+      border-radius: 4px;
+    }
+
+    .piano {
+      position: relative;
+      width: 1120px; 
+      height: 150px;
+      flex-shrink: 0;
+      margin: 0 auto;
+    }
+    
+    .white-key {
+      position: absolute;
+      top: 0;
+      width: 40px;
+      height: 150px;
+      background: #f5f0e4;
+      border: 1.5px solid #6b5a3a;
+      border-radius: 0 0 9px 9px;
+      cursor: pointer;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 10px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.5), inset 0 -1px 3px rgba(0,0,0,0.1);
+      transition: background .08s, box-shadow .08s;
+      user-select: none;
+      box-sizing: border-box;
+    }
+    
+    .white-key.active {
+      background: #cdc5ad;
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.22);
+    }
+    
+    .black-key {
+      position: absolute;
+      top: 0;
+      width: 24px;
+      height: 95px;
+      background: #17101f;
+      border-radius: 0 0 6px 6px;
+      z-index: 2;
+      box-shadow: 0 7px 16px rgba(0,0,0,0.75), inset 0 -1px 2px rgba(255,255,255,0.06);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: background .08s;
+    }
+
+    .black-key.active {
+      background: #362847;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="diff-selector" id="diffSelector">
+    <button class="diff-btn active" onclick="setLevel(1)">Beginner</button>
+    <button class="diff-btn" onclick="setLevel(2)">Intermediate</button>
+    <button class="diff-btn" onclick="setLevel(3)">Advanced</button>
+  </div>
+
+  <div style="display:flex; gap:2.5rem; align-items:flex-end;">
+    <div style="text-align:center;">
+      <div style="font-size:9px; letter-spacing:2.5px; opacity:0.38; margin-bottom:3px;">SCORE</div>
+      <div id="scoreDisplay" style="font-size:28px; line-height:1; color:#e8d9b5; font-weight:bold;">0</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:9px; letter-spacing:2.5px; opacity:0.38; margin-bottom:3px;">STREAK</div>
+      <div id="streakDisplay" style="font-size:28px; line-height:1; color:#e8d9b5; font-weight:bold;">0</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:9px; letter-spacing:2.5px; opacity:0.38; margin-bottom:3px;">BEST</div>
+      <div id="bestDisplay" style="font-size:28px; line-height:1; color:#7ab5c4; font-weight:bold;">0</div>
+    </div>
+  </div>
+
+  <div class="staff-container">
+    <svg id="staffSvg" width="340" height="148" style="display:block; overflow:visible;">
+      <line x1="63" y1="40" x2="63" y2="96" stroke="#2a1f0a" stroke-width="2"/>
+      <line x1="320" y1="40" x2="320" y2="96" stroke="#2a1f0a" stroke-width="2"/>
+      
+      <line x1="63" y1="40" x2="320" y2="40" stroke="#2a1f0a" stroke-width="1.5"/>
+      <line x1="63" y1="54" x2="320" y2="54" stroke="#2a1f0a" stroke-width="1.5"/>
+      <line x1="63" y1="68" x2="320" y2="68" stroke="#2a1f0a" stroke-width="1.5"/>
+      <line x1="63" y1="82" x2="320" y2="82" stroke="#2a1f0a" stroke-width="1.5"/>
+      <line x1="63" y1="96" x2="320" y2="96" stroke="#2a1f0a" stroke-width="1.5"/>
+      
+      <text id="clefSymbol" x="8" y="108" font-size="84" fill="#2a1f0a" style="font-family:serif; user-select:none;">𝄞</text>
+
+      <g id="noteGroupWrapper" style="transform:translate(200px, 82px);">
+        <g id="noteGroup" class="ni">
+          <g id="ledgerLines"></g>
+          <text id="accidentalText" x="-22" y="6" font-size="22" font-family="serif" fill="#2a1f0a" style="display:none;">♯</text>
+          <ellipse rx="8" ry="5.5" transform="rotate(-15)" fill="#2a1f0a"/>
+          <line id="noteStem" x1="8" y1="-2" x2="8" y2="-46" stroke="#2a1f0a" stroke-width="2"/>
+        </g>
+      </g>
+
+      <g id="particles" style="transform:translate(200px, 82px); display:none;"></g>
+
+      <text id="feedbackText" x="228" y="70" font-size="14" font-weight="bold" fill="#2a8a3a" style="font-family:sans-serif; display:none;"></text>
+    </svg>
+  </div>
+
+  <div class="piano-wrapper" id="pianoWrapper">
+    <div class="piano" id="pianoContainer"></div>
+  </div>
+
+  <div style="font-size:10px; opacity:0.4; letter-spacing:1px; text-align:center; max-width: 400px; line-height: 1.6;">
+    <strong>MOUSE:</strong> Click keys for exact octave matching.<br>
+    <span style="opacity:0.7;"><strong>KEYBOARD (Pitch Class Only):</strong> WHITE: A – J &nbsp;|&nbsp; BLACK: W, E, T, Y, U</span>
+  </div>
+
+  <script>
+    // --- DATA & CONFIG ---
+    const FREQ = {
+      'C2': 65.41, 'C#2': 69.30, 'D2': 73.42, 'D#2': 77.78, 'E2': 82.41, 'F2': 87.31, 'F#2': 92.50, 'G2': 98.00, 'G#2': 103.83, 'A2': 110.00, 'A#2': 116.54, 'B2': 123.47,
+      'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
+      'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+      'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+    };
+
+    // Note positions on the staff (Y coordinate). Top line is 40, bottom is 96.
+    const NOTE_DEFS = {
+      // Extended Bass Clef (C2 to middle C)
+      'C2': { y: 124, clef: 'bass', key: 'C', ledgers: [0, -14] },
+      'C#2': { y: 124, clef: 'bass', key: 'C#', acc: '♯', ledgers: [0, -14] },
+      'D2': { y: 117, clef: 'bass', key: 'D', ledgers: [-7] },
+      'D#2': { y: 117, clef: 'bass', key: 'D#', acc: '♯', ledgers: [-7] },
+      'E2': { y: 110, clef: 'bass', key: 'E', ledgers: [0] },
+      'F2': { y: 103, clef: 'bass', key: 'F' },
+      'F#2': { y: 103, clef: 'bass', key: 'F#', acc: '♯' },
+      'G2': { y: 96, clef: 'bass', key: 'G' },
+      'G#2': { y: 96, clef: 'bass', key: 'G#', acc: '♯' },
+      'A2': { y: 89, clef: 'bass', key: 'A' },
+      'A#2': { y: 89, clef: 'bass', key: 'A#', acc: '♯' },
+      'B2': { y: 82, clef: 'bass', key: 'B' },
+      'C3': { y: 75, clef: 'bass', key: 'C' },
+      'C#3': { y: 75, clef: 'bass', key: 'C#', acc: '♯' },
+      'D3': { y: 68, clef: 'bass', key: 'D' },
+      'D#3': { y: 68, clef: 'bass', key: 'D#', acc: '♯' },
+      'E3': { y: 61, clef: 'bass', key: 'E' },
+      'F3': { y: 54, clef: 'bass', key: 'F' },
+      'F#3': { y: 54, clef: 'bass', key: 'F#', acc: '♯' },
+      'G3': { y: 47, clef: 'bass', key: 'G' },
+      'G#3': { y: 47, clef: 'bass', key: 'G#', acc: '♯' },
+      'A3': { y: 40, clef: 'bass', key: 'A' },
+      'A#3': { y: 40, clef: 'bass', key: 'A#', acc: '♯' },
+      'B3': { y: 33, clef: 'bass', key: 'B' }, 
+      
+      // Extended Treble Clef (Middle C to B5)
+      'C4': { y: 110, clef: 'treble', key: 'C', ledgers: [0] },
+      'C#4': { y: 110, clef: 'treble', key: 'C#', acc: '♯', ledgers: [0] },
+      'D4': { y: 103, clef: 'treble', key: 'D' },
+      'D#4': { y: 103, clef: 'treble', key: 'D#', acc: '♯' },
+      'E4': { y: 96, clef: 'treble', key: 'E' },
+      'F4': { y: 89, clef: 'treble', key: 'F' },
+      'F#4': { y: 89, clef: 'treble', key: 'F#', acc: '♯' },
+      'G4': { y: 82, clef: 'treble', key: 'G' },
+      'G#4': { y: 82, clef: 'treble', key: 'G#', acc: '♯' },
+      'A4': { y: 75, clef: 'treble', key: 'A' },
+      'A#4': { y: 75, clef: 'treble', key: 'A#', acc: '♯' },
+      'B4': { y: 68, clef: 'treble', key: 'B' },
+      'C5': { y: 61, clef: 'treble', key: 'C' },
+      'C#5': { y: 61, clef: 'treble', key: 'C#', acc: '♯' },
+      'D5': { y: 54, clef: 'treble', key: 'D' },
+      'D#5': { y: 54, clef: 'treble', key: 'D#', acc: '♯' },
+      'E5': { y: 47, clef: 'treble', key: 'E' },
+      'F5': { y: 40, clef: 'treble', key: 'F' },
+      'F#5': { y: 40, clef: 'treble', key: 'F#', acc: '♯' },
+      'G5': { y: 33, clef: 'treble', key: 'G' },
+      'G#5': { y: 33, clef: 'treble', key: 'G#', acc: '♯' },
+      'A5': { y: 26, clef: 'treble', key: 'A', ledgers: [0] },
+      'A#5': { y: 26, clef: 'treble', key: 'A#', acc: '♯', ledgers: [0] },
+      'B5': { y: 19, clef: 'treble', key: 'B', ledgers: [7] }
+    };
+
+    const LEVELS = {
+      1: ['C4','D4','E4','F4','G4','A4','B4'],
+      2: ['C2','D2','E2','F2','G2','A2','B2','C3','D3','E3','F3','G3','A3','B3','C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5','A5','B5'],
+      3: Object.keys(NOTE_DEFS)
+    };
+
+    // Keyboard bindings mapping
+    const KEY_MAP = {
+      'a':'C', 's':'D', 'd':'E', 'f':'F', 'g':'G', 'h':'A', 'j':'B',
+      'w':'C#', 'e':'D#', 't':'F#', 'y':'G#', 'u':'A#'
+    };
+
+    const WK = ['C','D','E','F','G','A','B'];
+    const BK = [{a:0, n:'C♯', k:'C#'},{a:1, n:'D♯', k:'D#'},{a:3, n:'F♯', k:'F#'},{a:4, n:'G♯', k:'G#'},{a:5, n:'A♯', k:'A#'}];
+    const KH = 'ASDFGHJ';
+    const KBH = ['W','E','T','Y','U'];
+
+    // --- APP STATE ---
+    let currentLevel = 1;
+    let currentNoteId = 'C4';
+    let score = 0;
+    let streak = 0;
+    let best = 0;
+    let phase = 'show'; 
+    let audioCtx;
+
+    // --- DOM REFERENCES ---
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const streakDisplay = document.getElementById('streakDisplay');
+    const bestDisplay = document.getElementById('bestDisplay');
+    const noteGroupWrapper = document.getElementById('noteGroupWrapper');
+    const noteGroup = document.getElementById('noteGroup');
+    const ledgerLines = document.getElementById('ledgerLines');
+    const noteStem = document.getElementById('noteStem');
+    const accidentalText = document.getElementById('accidentalText');
+    const clefSymbol = document.getElementById('clefSymbol');
+    const particlesGroup = document.getElementById('particles');
+    const feedbackText = document.getElementById('feedbackText');
+    const pianoContainer = document.getElementById('pianoContainer');
+
+    // --- INITIALIZATION ---
+    function initApp() {
+      // Build Particles
+      for(let i=0; i<8; i++) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute('r', '3.5');
+        circle.setAttribute('fill', i%2 ? '#e04040' : '#b82020');
+        circle.setAttribute('class', `fp fp${i}`);
+        particlesGroup.appendChild(circle);
+      }
+
+      // Build 4 Octaves (C2 to B5)
+      const octaves = [2, 3, 4, 5];
+      let wIndex = 0;
+      
+      octaves.forEach(oct => {
+        // White Keys
+        WK.forEach((k, i) => {
+          const key = document.createElement('div');
+          key.className = 'white-key';
+          key.style.left = `${wIndex * 40}px`;
+          key.id = `key-${k}${oct}`;
+          
+          let hint = oct === 4 ? `<span style="font-size:9px; color:#9a8070; margin-top:4px;">${KH[i]}</span>` : '';
+          key.innerHTML = `<span style="font-size:12px; color:#4a3520; font-weight:bold;">${k}${oct}</span>${hint}`;
+          key.onmousedown = () => guess(`${k}${oct}`);
+          pianoContainer.appendChild(key);
+          wIndex++;
+        });
+
+        // Black Keys
+        BK.forEach((bk, i) => {
+          const key = document.createElement('div');
+          key.className = 'black-key';
+          // Calculate absolute index offset for this octave
+          const absWIndex = (octaves.indexOf(oct) * 7) + bk.a;
+          key.style.left = `${absWIndex * 40 + 40 - 12}px`;
+          key.id = `key-${bk.k}${oct}`;
+          
+          let hint = oct === 4 ? `<span style="font-size:8px; color:#4a3a60; letter-spacing:.5px;">${KBH[i]}</span>` : '';
+          key.innerHTML = `<span style="font-size:9px; color:#6b5a80; font-weight:bold; margin-bottom:2px">${bk.n.replace('♯','')}</span>${hint}`;
+          key.onmousedown = () => guess(`${bk.k}${oct}`);
+          pianoContainer.appendChild(key);
+        });
+      });
+
+      // Center scroll on load
+      setTimeout(() => {
+        const wrapper = document.getElementById('pianoWrapper');
+        if(wrapper) wrapper.scrollLeft = (wrapper.scrollWidth - wrapper.clientWidth) / 2;
+      }, 50);
+
+      spawn();
+    }
+
+    // --- AUDIO LOGIC ---
+    function getCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playCorrect(noteId) {
+      const ctx = getCtx();
+      const now = ctx.currentTime;
+      const freq = FREQ[noteId];
+      [[1, 0.45], [2, 0.14], [3, 0.07], [4, 0.035]].forEach(([mult, vol]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq * mult;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
+        osc.start(now);
+        osc.stop(now + 1.6);
+      });
+    }
+
+    function playError() {
+      const ctx = getCtx();
+      const now = ctx.currentTime;
+      [[180, 130], [270, 195]].forEach(([startF, endF]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(startF, now);
+        osc.frequency.exponentialRampToValueAtTime(endF, now + 0.28);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.32);
+      });
+    }
+
+    // --- GAME LOGIC ---
+    function setLevel(lvl) {
+      currentLevel = lvl;
+      document.querySelectorAll('.diff-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === lvl - 1);
+      });
+      score = 0; streak = 0;
+      scoreDisplay.textContent = 0; streakDisplay.textContent = 0;
+      spawn();
+    }
+
+    function updateNoteUI() {
+      const def = NOTE_DEFS[currentNoteId];
+      
+      // Update Clef
+      if (def.clef === 'treble') {
+        clefSymbol.textContent = '𝄞';
+        clefSymbol.setAttribute('y', '108');
+        clefSymbol.setAttribute('font-size', '84');
+      } else {
+        clefSymbol.textContent = '𝄢';
+        clefSymbol.setAttribute('y', '84');
+        clefSymbol.setAttribute('font-size', '68');
+      }
+
+      noteGroupWrapper.style.transform = `translate(200px, ${def.y}px)`;
+      
+      // Ledger Lines
+      ledgerLines.innerHTML = '';
+      if (def.ledgers) {
+        def.ledgers.forEach(off => {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', '-16');
+          line.setAttribute('y1', off);
+          line.setAttribute('x2', '16');
+          line.setAttribute('y2', off);
+          line.setAttribute('stroke', '#2a1f0a');
+          line.setAttribute('stroke-width', '1.5');
+          ledgerLines.appendChild(line);
+        });
+      }
+
+      // Stem Direction (flip stem down for middle line and above)
+      if (def.y <= 68) {
+        noteStem.setAttribute('x1', '-8');
+        noteStem.setAttribute('x2', '-8');
+        noteStem.setAttribute('y1', '2');
+        noteStem.setAttribute('y2', '46');
+      } else {
+        noteStem.setAttribute('x1', '8');
+        noteStem.setAttribute('x2', '8');
+        noteStem.setAttribute('y1', '-2');
+        noteStem.setAttribute('y2', '-46');
+      }
+
+      // Accidentals
+      if (def.acc) {
+        accidentalText.textContent = def.acc;
+        accidentalText.style.display = 'block';
+      } else {
+        accidentalText.style.display = 'none';
+      }
+    }
+
+    function spawn() {
+      const pool = LEVELS[currentLevel];
+      let next;
+      do { next = pool[Math.floor(Math.random() * pool.length)]; } while (next === currentNoteId);
+      currentNoteId = next;
+      phase = 'show';
+
+      updateNoteUI();
+      
+      noteGroup.className.baseVal = '';
+      void noteGroup.offsetWidth; 
+      noteGroup.className.baseVal = 'ni';
+
+      particlesGroup.style.display = 'none';
+      feedbackText.style.display = 'none';
+      noteGroup.style.display = 'block';
+    }
+
+    function guess(guessedVal) {
+      if (phase !== 'show') return;
+
+      const def = NOTE_DEFS[currentNoteId];
+      const displayNote = def.key + currentNoteId.slice(-1);
+
+      let isCorrect = false;
+      let highlightKeyId = guessedVal;
+
+      // Check if it's a pitch-class guess (from QWERTY keyboard) or exact guess (mouse)
+      if (guessedVal.length <= 2 && !/\d/.test(guessedVal)) {
+        // Pitch class guess
+        isCorrect = (guessedVal === def.key);
+        // If correct, highlight the right octave. If wrong, highlight what they guessed in the current octave.
+        highlightKeyId = isCorrect ? currentNoteId : guessedVal + currentNoteId.slice(-1);
+      } else {
+        // Exact octave guess
+        isCorrect = (guessedVal === currentNoteId);
+      }
+
+      // Key UI highlight
+      const keyEl = document.getElementById(`key-${highlightKeyId}`);
+      if(keyEl) {
+        keyEl.classList.add('active');
+        setTimeout(() => keyEl.classList.remove('active'), 180);
+      }
+
+      getCtx(); 
+
+      if (isCorrect) {
+        playCorrect(currentNoteId);
+        streak++;
+        score++;
+        if (streak > best) best = streak;
+
+        scoreDisplay.textContent = score;
+        streakDisplay.textContent = streak;
+        streakDisplay.style.color = streak >= 3 ? '#f4c060' : '#e8d9b5';
+        bestDisplay.textContent = best;
+        
+        scoreDisplay.classList.remove('scoreIn');
+        void scoreDisplay.offsetWidth;
+        scoreDisplay.classList.add('scoreIn');
+
+        feedbackText.textContent = `✓ ${displayNote}`;
+        feedbackText.setAttribute('fill', '#2a8a3a');
+        feedbackText.setAttribute('y', def.y - 12);
+        feedbackText.style.display = 'block';
+
+        phase = 'fall';
+        noteGroup.className.baseVal = 'nf';
+        setTimeout(spawn, 700);
+
+      } else {
+        playError();
+        streak = 0;
+        streakDisplay.textContent = streak;
+        streakDisplay.style.color = '#e8d9b5';
+
+        feedbackText.textContent = `✗ ${displayNote}`;
+        feedbackText.setAttribute('fill', '#c03030');
+        feedbackText.setAttribute('y', def.y - 12);
+        feedbackText.style.display = 'block';
+
+        phase = 'break';
+        noteGroup.className.baseVal = 'nb';
+        
+        particlesGroup.style.transform = `translate(200px, ${def.y}px)`;
+        particlesGroup.style.display = 'block';
+        particlesGroup.querySelectorAll('.fp').forEach(fp => {
+          const name = fp.className.baseVal;
+          fp.className.baseVal = '';
+          void fp.offsetWidth;
+          fp.className.baseVal = name;
+        });
+
+        setTimeout(spawn, 820);
+      }
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', e => {
+      const mappedKey = KEY_MAP[e.key?.toLowerCase()];
+      if (mappedKey) guess(mappedKey);
+    });
+
+    // Start
+    initApp();
+  </script>
+</body>
+</html>
+    </textarea>
+
+    <textarea id="code-snake" style="display:none;">
+      <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snake Game - Progressive Difficulty</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; background-color: #2c3e50; color: white; font-family: sans-serif; }
+        #ui { margin-bottom: 10px; font-size: 20px; }
+        #gameContainer { position: relative; }
+        canvas { border: 5px solid #ecf0f1; background-color: #000; display: block; }
+        .overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.8);
+        }
+        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; }
+    </style>
+</head>
+<body>
+
+<div id="ui">Score: <span id="scoreVal">0</span> | Time: <span id="timeVal">0</span>s | Speed: <span id="speedVal">200</span>ms</div>
+<div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="800"></canvas>
+    
+    <div id="startMenu" class="overlay">
+        <h2>Ready to Play?</h2>
+        <button onclick="startGame()" style="background: #27ae60;">Start Game</button>
+    </div>
+
+    <div id="restartMenu" class="overlay" style="display: none;">
+        <h2>Game Over!</h2>
+        <button onclick="location.reload()" style="background: #e74c3c;">Restart</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("scoreVal");
+    const timeEl = document.getElementById("timeVal");
+    const speedEl = document.getElementById("speedVal");
+    const startMenu = document.getElementById("startMenu");
+    const restartMenu = document.getElementById("restartMenu");
+
+    const box = 40; 
+    let snake, foods, score, time, d, gameInterval, gameSpeed, particles, timerInterval;
+
+    function startGame() {
+        snake = [{ x: 10 * box, y: 10 * box }];
+        foods = [generateFood(), generateFood()];
+        score = 0;
+        time = 0;
+        d = null;
+        particles = [];
+        gameSpeed = 200; // Updated initial speed to 200ms
+        speedEl.innerText = gameSpeed;
+        startMenu.style.display = "none";
+        
+        timerInterval = setInterval(() => { time++; timeEl.innerText = time; }, 1000);
+        gameInterval = setInterval(draw, gameSpeed);
+    }
+
+    document.addEventListener("keydown", (e) => {
+        if(e.keyCode == 37 && d != "RIGHT") d = "LEFT";
+        else if(e.keyCode == 38 && d != "DOWN") d = "UP";
+        else if(e.keyCode == 39 && d != "LEFT") d = "RIGHT";
+        else if(e.keyCode == 40 && d != "UP") d = "DOWN";
+    });
+
+    function generateFood() {
+        return { x: Math.floor(Math.random() * 20) * box, y: Math.floor(Math.random() * 20) * box };
+    }
+
+    function createFirework() {
+        for(let i = 0; i < 50; i++) {
+            particles.push({ x: 400, y: 400, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 50 });
+        }
+    }
+
+    function draw() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 800, 800);
+
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.life--;
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(p.x, p.y, 5, 5);
+            if(p.life <= 0) particles.splice(i, 1);
+        });
+
+        snake.forEach((s, i) => {
+            ctx.fillStyle = (i == 0) ? "green" : "white";
+            ctx.fillRect(s.x, s.y, box, box);
+        });
+
+        ctx.fillStyle = "red";
+        foods.forEach(f => ctx.fillRect(f.x, f.y, box, box));
+
+        if (!d) return;
+
+        let head = { x: snake[0].x, y: snake[0].y };
+        if(d == "LEFT") head.x -= box;
+        else if(d == "UP") head.y -= box;
+        else if(d == "RIGHT") head.x += box;
+        else if(d == "DOWN") head.y += box;
+
+        let eatIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
+        if(eatIndex !== -1) {
+            score++;
+            scoreEl.innerText = score;
+            foods[eatIndex] = generateFood();
+            
+            // Speed slows down by 10ms every 10 apples
+            if(score % 10 === 0) {
+                clearInterval(gameInterval);
+                gameSpeed += 10; 
+                speedEl.innerText = gameSpeed;
+                gameInterval = setInterval(draw, gameSpeed);
+                createFirework();
+            }
+        } else {
+            snake.pop();
+        }
+
+        if(head.x < 0 || head.x >= 800 || head.y < 0 || head.y >= 800 || snake.some(s => s.x === head.x && s.y === head.y)) {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            restartMenu.style.display = "flex";
+            return;
+        }
+
+        snake.unshift(head);
+    }
+</script>
+</body>
+</html>
+
+
+    </textarea>
+
+    <textarea id="code-tetris" style="display:none;">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tetris Clone</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    canvas {
+      background: #000;
+      border: 4px solid #444;
+      image-rendering: pixelated;
+    }
+
+    .panel {
+      width: 180px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    .info {
+      margin-bottom: 20px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .controls {
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      background: #2b7cff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    button:hover {
+      background: #5597ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div>
+      <canvas id="game" width="300" height="600"></canvas>
+    </div>
+
+    <div class="panel">
+      <h1>TETRIS</h1>
+
+      <div class="info">
+        <div style="margin-bottom:16px;">
+          <div style="margin-bottom:6px;">Next:</div>
+          <canvas id="next" width="120" height="120" style="background:#000;border:3px solid #444;"></canvas>
+        </div>
+        <div>Score: <span id="score">0</span></div>
+        <div>Lines: <span id="lines">0</span></div>
+        <div>Level: <span id="level">1</span></div>
+        <div>Time: <span id="timer">00:00</span></div>
+      </div>
+
+      <button onclick="restartGame()">Restart</button>
+
+      <div class="controls">
+        <h3>Controls</h3>
+        ← → Move<br>
+        ↓ Soft Drop<br>
+        ↑ Rotate<br>
+        Space Hard Drop<br>
+        P Pause
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    const nextCanvas = document.getElementById('next');
+    const nextCtx = nextCanvas.getContext('2d');
+
+    const COLS = 10;
+    const ROWS = 20;
+    const BLOCK = 30;
+
+    ctx.scale(BLOCK, BLOCK);
+
+    const colors = [
+      null,
+      '#00FFFF',
+      '#0000FF',
+      '#FF7F00',
+      '#FFFF00',
+      '#00FF00',
+      '#800080',
+      '#FF0000'
+    ];
+
+    const arena = createMatrix(COLS, ROWS);
+
+    const player = {
+      pos: { x: 0, y: 0 },
+      matrix: null,
+      nextMatrix: null,
+      score: 0,
+      lines: 0,
+      level: 1
+    };
+
+    let dropCounter = 0;
+    let dropInterval = 1000;
+    let lastTime = 0;
+    let paused = false;
+    let gameOver = false;
+
+    let startTime = Date.now();
+
+    function createMatrix(w, h) {
+      const matrix = [];
+      while (h--) {
+        matrix.push(new Array(w).fill(0));
+      }
+      return matrix;
+    }
+
+    function createPiece(type) {
+      switch(type) {
+        case 'T':
+          return [
+            [0, 6, 0],
+            [6, 6, 6],
+            [0, 0, 0]
+          ];
+        case 'O':
+          return [
+            [4, 4],
+            [4, 4]
+          ];
+        case 'L':
+          return [
+            [0, 3, 0],
+            [0, 3, 0],
+            [0, 3, 3]
+          ];
+        case 'J':
+          return [
+            [0, 2, 0],
+            [0, 2, 0],
+            [2, 2, 0]
+          ];
+        case 'I':
+          return [
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0]
+          ];
+        case 'S':
+          return [
+            [0, 5, 5],
+            [5, 5, 0],
+            [0, 0, 0]
+          ];
+        case 'Z':
+          return [
+            [7, 7, 0],
+            [0, 7, 7],
+            [0, 0, 0]
+          ];
+      }
+    }
+
+    function drawMatrix(matrix, offset) {
+      matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            ctx.fillStyle = colors[value];
+            ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 0.05;
+            ctx.strokeRect(x + offset.x, y + offset.y, 1, 1);
+          }
+        });
+      });
+    }
+
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawMatrix(arena, { x: 0, y: 0 });
+      drawMatrix(player.matrix, player.pos);
+      drawNextPiece();
+
+      if (paused) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 8, 10, 4);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '1px Arial';
+        ctx.fillText('PAUSED', 2.7, 10.5);
+      }
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(0, 8, 10, 4);
+
+        ctx.fillStyle = 'red';
+        ctx.font = '1px Arial';
+        ctx.fillText('GAME OVER', 1.4, 10.5);
+      }
+    }
+
+    function drawNextPiece() {
+      nextCtx.fillStyle = '#000';
+      nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+      if (!player.nextMatrix) return;
+
+      const scale = 30;
+
+      player.nextMatrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            nextCtx.fillStyle = colors[value];
+            nextCtx.fillRect(x * scale + 15, y * scale + 15, scale, scale);
+
+            nextCtx.strokeStyle = '#111';
+            nextCtx.strokeRect(x * scale + 15, y * scale + 15, scale, scale);
+          }
+        });
+      });
+    }
+
+    function merge(arena, player) {
+      player.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            arena[y + player.pos.y][x + player.pos.x] = value;
+          }
+        });
+      });
+    }
+
+    function collide(arena, player) {
+      const [m, o] = [player.matrix, player.pos];
+
+      for (let y = 0; y < m.length; ++y) {
+        for (let x = 0; x < m[y].length; ++x) {
+          if (
+            m[y][x] !== 0 &&
+            (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0
+          ) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    function playerDrop() {
+      player.pos.y++;
+
+      if (collide(arena, player)) {
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
+      }
+
+      dropCounter = 0;
+    }
+
+    function hardDrop() {
+      while (!collide(arena, player)) {
+        player.pos.y++;
+      }
+
+      player.pos.y--;
+      merge(arena, player);
+      playerReset();
+      arenaSweep();
+      updateScore();
+    }
+
+    function playerMove(dir) {
+      player.pos.x += dir;
+
+      if (collide(arena, player)) {
+        player.pos.x -= dir;
+      }
+    }
+
+    function rotate(matrix, dir) {
+      for (let y = 0; y < matrix.length; ++y) {
+        for (let x = 0; x < y; ++x) {
+          [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+        }
+      }
+
+      if (dir > 0) {
+        matrix.forEach(row => row.reverse());
+      } else {
+        matrix.reverse();
+      }
+    }
+
+    function playerRotate(dir) {
+      const pos = player.pos.x;
+      let offset = 1;
+
+      rotate(player.matrix, dir);
+
+      while (collide(arena, player)) {
+        player.pos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+
+        if (offset > player.matrix[0].length) {
+          rotate(player.matrix, -dir);
+          player.pos.x = pos;
+          return;
+        }
+      }
+    }
+
+    function arenaSweep() {
+      let rowCount = 1;
+
+      outer: for (let y = arena.length - 1; y > 0; --y) {
+        for (let x = 0; x < arena[y].length; ++x) {
+          if (arena[y][x] === 0) {
+            continue outer;
+          }
+        }
+
+        const row = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(row);
+        ++y;
+
+        player.score += rowCount * 100;
+        player.lines += 1;
+        rowCount *= 2;
+      }
+
+      player.level = Math.floor(player.lines / 10) + 1;
+      dropInterval = Math.max(100, 1000 - ((player.level - 1) * 80));
+    }
+
+    function playerReset() {
+      const pieces = 'TJLOSZI';
+
+      if (!player.nextMatrix) {
+        player.nextMatrix = createPiece(
+          pieces[Math.floor(Math.random() * pieces.length)]
+        );
+      }
+
+      player.matrix = player.nextMatrix;
+
+      player.nextMatrix = createPiece(
+        pieces[Math.floor(Math.random() * pieces.length)]
+      );
+
+      player.pos.y = 0;
+      player.pos.x =
+        ((arena[0].length / 2) | 0) -
+        ((player.matrix[0].length / 2) | 0);
+
+      if (collide(arena, player)) {
+        gameOver = true;
+      }
+    }
+
+    function updateScore() {
+      document.getElementById('score').innerText = player.score;
+      document.getElementById('lines').innerText = player.lines;
+      document.getElementById('level').innerText = player.level;
+
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const seconds = String(elapsed % 60).padStart(2, '0');
+
+      document.getElementById('timer').innerText = `${minutes}:${seconds}`;
+    }
+
+    function update(time = 0) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+
+      if (!paused && !gameOver) {
+        updateScore();
+        dropCounter += deltaTime;
+
+        if (dropCounter > dropInterval) {
+          playerDrop();
+        }
+      }
+
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener('keydown', event => {
+      if (gameOver) return;
+
+      switch(event.key) {
+        case 'ArrowLeft':
+          playerMove(-1);
+          break;
+
+        case 'ArrowRight':
+          playerMove(1);
+          break;
+
+        case 'ArrowDown':
+          playerDrop();
+          break;
+
+        case 'ArrowUp':
+          playerRotate(1);
+          break;
+
+        case ' ':
+          hardDrop();
+          break;
+
+        case 'p':
+        case 'P':
+          paused = !paused;
+          break;
+      }
+    });
+
+    function restartGame() {
+      for (let y = 0; y < arena.length; y++) {
+        arena[y].fill(0);
+      }
+
+      player.score = 0;
+      player.lines = 0;
+      player.level = 1;
+
+      dropInterval = 1000;
+      paused = false;
+      startTime = Date.now();
+      gameOver = false;
+
+      updateScore();
+      playerReset();
+    }
+
+    playerReset();
+    updateScore();
+    update();
+  </script>
+</body>
+</html>
+
+    </textarea>
+
+    <textarea id="code-opm" style="display:none;">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Management - Flash Search</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --accent-blue: #007bff;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+            --input-bg: #2d2d2d;
+            --border-color: #333;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-primary);
+            display: flex; flex-direction: column; align-items: center; padding: 20px; 
+        }
+
+        .card { 
+            background: var(--card-bg); padding: 25px; border-radius: 12px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 100%; max-width: 450px; 
+            margin-bottom: 20px; border: 1px solid var(--border-color);
+        }
+
+        h2 { margin-top: 0; border-bottom: 2px solid var(--accent-blue); padding-bottom: 10px; }
+        
+        input, select { 
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; 
+            border: 1px solid var(--border-color); background: var(--input-bg); color: white;
+        }
+
+        button { 
+            width: 100%; padding: 12px; border: none; border-radius: 6px; 
+            cursor: pointer; font-weight: bold; color: white; margin-top: 5px;
+        }
+
+        .btn-search { background-color: var(--accent-blue); }
+        .btn-add { background-color: var(--accent-green); flex: 1; }
+        .btn-remove { background-color: var(--accent-red); flex: 1; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+
+        /* Animation Keyframes */
+        @keyframes flashSuccess {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(40, 167, 69, 0.4); }
+            100% { background-color: transparent; }
+        }
+
+        @keyframes flashError {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(220, 53, 69, 0.4); }
+            100% { background-color: transparent; }
+        }
+
+        .flash-success { animation: flashSuccess 0.6s ease-out 3; border-radius: 8px; }
+        .flash-error { animation: flashError 0.6s ease-out 3; border-radius: 8px; }
+
+        #displayArea { 
+            margin-top: 20px; padding: 15px; text-align: center; 
+            font-size: 1.1rem; min-height: 3em; transition: all 0.3s;
+        }
+
+        .status-msg { font-size: 0.85rem; margin-top: 15px; color: var(--text-secondary); text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🔍 Search Unit</h2>
+    <input type="number" id="lookupInput" placeholder="Enter Unit (e.g., 84)" onkeydown="if(event.key === 'Enter') lookupUnit()">
+    <button class="btn-search" onclick="lookupUnit()">Find Section</button>
+    <!-- This div will flash -->
+    <div id="displayArea"></div>
+</div>
+
+<div class="card">
+    <h2>⚙️ Management</h2>
+    <select id="sectionSelect">
+        <option value="Carseland">Carseland</option>
+        <option value="Section IA">Section IA</option>
+        <option value="Section IB">Section IB</option>
+        <option value="Section II">Section II</option>
+        <option value="Section III">Section III</option>
+        <option value="Section IV">Section IV</option>
+        <option value="Section V">Section V</option>
+        <option value="Section VI">Section VI</option>
+        <option value="Supply Distribution (MST)">Supply Distribution (MST)</option>
+    </select>
+    <input type="number" id="manageInput" placeholder="Unit Number" onkeydown="if(event.key === 'Enter') modifyUnit('add')">
+    <div class="btn-group">
+        <button class="btn-add" onclick="modifyUnit('add')">Add</button>
+        <button class="btn-remove" onclick="modifyUnit('remove')">Remove</button>
+    </div>
+    <div id="managementStatus" class="status-msg"></div>
+</div>
+
+<script>
+    // Initializing data based on Section & Units.PNG
+    // Includes your edits: +12 to Sec III, +22/45 to Sec VI, -19 from Sec VI.
+    const initialData = {
+        "Carseland": [84],
+        "Section IA": [5, 6, 7, 8, 10, 11],
+        "Section IB": [4, 9, 25, 34],
+        "Section II": [13, 18, 20, 24, 27],
+        "Section III": [12, 14, 15, 16, 17, 19, 26],
+        "Section IV": [2, 3, 21, 23, 29],
+        "Section V": [28, 30, 35, 46],
+        "Section VI": [22, 40, 43, 44, 45, 48, 50, 54, 56],
+        "Supply Distribution (MST)": [88, 90, 91]
+    };
+
+    let unitData = JSON.parse(localStorage.getItem('unitData')) || initialData;
+
+    function saveData() { localStorage.setItem('unitData', JSON.stringify(unitData)); }
+
+    function lookupUnit() {
+        const val = parseInt(document.getElementById('lookupInput').value);
+        const display = document.getElementById('displayArea');
+        
+        // Remove existing animation classes to reset the flash
+        display.classList.remove('flash-success', 'flash-error');
+        void display.offsetWidth; // Trigger reflow to restart animation
+
+        if (isNaN(val)) {
+            display.innerHTML = '<span style="color:var(--text-secondary)">Enter a number.</span>';
+            return;
+        }
+
+        let found = false;
+        for (const [section, units] of Object.entries(unitData)) {
+            if (units.includes(val)) {
+                display.innerHTML = `Unit ${val} found in:<br><span style="color:var(--accent-blue)">${section}</span>`;
+                display.classList.add('flash-success');
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            display.innerHTML = `<span style="color:var(--accent-red)">Unit ${val} not found.</span>`;
+            display.classList.add('flash-error');
+        }
+    }
+
+    function modifyUnit(action) {
+        const section = document.getElementById('sectionSelect').value;
+        const unit = parseInt(document.getElementById('manageInput').value);
+        const status = document.getElementById('managementStatus');
+
+        if (isNaN(unit)) {
+            status.innerText = "Enter a valid unit.";
+            return;
+        }
+
+        if (action === 'add') {
+            if (!unitData[section].includes(unit)) {
+                unitData[section].push(unit);
+                unitData[section].sort((a, b) => a - b);
+                saveData();
+                status.innerText = `Added ${unit} to ${section}.`;
+            } else {
+                status.innerText = `${unit} is already there.`;
+            }
+        } else if (action === 'remove') {
+            const index = unitData[section].indexOf(unit);
+            if (index > -1) {
+                unitData[section].splice(index, 1);
+                saveData();
+                status.innerText = `Removed ${unit} from ${section}.`;
+            } else {
+                status.innerText = `${unit} not in ${section}.`;
+            }
+        }
+        document.getElementById('manageInput').value = '';
+    }
+</script>
+</body>
+</html>
+    </textarea>
+
+    <textarea id="code-quickref" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Reference</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 40px 20px; 
+            background-color: #121212; 
+            color: #e0e0e0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+        }
+        h2 { 
+            color: #007bff; 
+            margin-top: 0; 
+            margin-bottom: 30px;
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+        .gallery {
+            display: flex; 
+            flex-direction: column; 
+            gap: 40px;
+            max-width: 900px; 
+            width: 100%; 
+            align-items: center;
+        }
+        .img-card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        img {
+            max-width: 100%; 
+            height: auto; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Quick Reference Guides</h2>
+    <div class="gallery">
+        <div class="img-card"><img src="04.PNG" alt="Drafting Checklist"></div>
+        <div class="img-card"><img src="01.PNG" alt="Hardware Sizes"></div>
+        <div class="img-card"><img src="02.PNG" alt="Discipline Codes"></div>
+        <div class="img-card"><img src="03.PNG" alt="Standard US Architectural Drawing Sizes"></div>
+    </div>
+</body>
+</html>
+    </textarea>
+
+    <textarea id="code-screensaver" style="display:none;">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Matrix Screensaver</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; cursor: none; }
+        canvas { display: block; }
+
+        /* Control Panel Styling */
+        #control-panel {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(15, 15, 15, 0.9); border: 1px solid #444;
+            padding: 15px; border-radius: 8px; color: #fff;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: opacity 0.5s ease; z-index: 10; width: 280px;
+        }
+
+        .panel-section { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #aaa; }
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+        .btn-colors { grid-template-columns: 1fr 1fr; }
+
+        button {
+            background: #222; border: 1px solid #444; color: #fff;
+            padding: 5px; font-size: 12px; cursor: pointer; border-radius: 4px;
+        }
+        button.active { background: #00ff00; color: #000; font-weight: bold; border-color: #00ff00; }
+        
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: #00ff00; }
+    </style>
+</head>
+<body>
+
+    <div id="control-panel">
+        <div class="panel-section">
+            <label>Characters</label>
+            <div class="btn-group">
+                <button id="btn-default" class="active" onclick="setMode('default')">All</button>
+                <button id="btn-❄" onclick="setMode('❄')">❄</button>
+                <button id="btn-🍃" onclick="setMode('🍃')">🍃</button>
+                <button id="btn-💧" onclick="setMode('💧')">💧</button>
+                <button id="btn-☀" onclick="setMode('☀')">☀</button>
+                <button id="btn-$" onclick="setMode('$')">$</button>
+            </div>
+        </div>
+        <div class="panel-section">
+            <label>Color Palette</label>
+            <div class="btn-group btn-colors">
+                <button id="btn-green" class="active" onclick="setTheme('green')">Green</button>
+                <button id="btn-amber" onclick="setTheme('amber')">Amber</button>
+                <button id="btn-cyber" onclick="setTheme('cyber')">Cyber</button>
+                <button id="btn-rainbow" onclick="setTheme('rainbow')">Rainbow</button>
+            </div>
+        </div>
+        <div class="panel-section">
+            <label>Drop Speed: <span id="speed-val">30</span>ms</label>
+            <input type="range" id="speed-slider" min="10" max="100" value="30" step="5" oninput="updateSpeed(this.value)">
+        </div>
+    </div>
+
+    <canvas id="screensaver"></canvas>
+
+    <script>
+        const canvas = document.getElementById('screensaver');
+        const ctx = canvas.getContext('2d');
+        const panel = document.getElementById('control-panel');
+        
+        let mode = 'default';
+        let currentTheme = 'green';
+        let frameDelay = 30;
+        
+        const fontSize = 18;
+        const alphabet = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ1234567890'.split('');
+        let columns, rainDrops, intervalId;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            columns = Math.floor(canvas.width / fontSize);
+            rainDrops = Array(columns).fill(0).map(() => Math.random() * -100);
+        }
+
+        function getChar() {
+            if (mode === 'default') return alphabet[Math.floor(Math.random() * alphabet.length)];
+            return mode;
+        }
+
+        function getColor(colIndex) {
+            switch(currentTheme) {
+                case 'amber': return '#ffb000';
+                case 'cyber': return colIndex % 2 === 0 ? '#ff007f' : '#00f3ff';
+                case 'rainbow': return `hsl(${(colIndex / columns) * 360}, 100%, 50%)`;
+                default: return '#0F0';
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = `bold ${fontSize}px monospace`;
+
+            rainDrops.forEach((y, i) => {
+                ctx.fillStyle = getColor(i);
+                ctx.fillText(getChar(), i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.98) rainDrops[i] = 0;
+                rainDrops[i]++;
+            });
+        }
+
+        function setMode(m) {
+            mode = m;
+            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + (m === 'default' ? 'default' : m)).classList.add('active');
+        }
+
+        function setTheme(t) {
+            currentTheme = t;
+            document.querySelectorAll('.btn-colors button').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + t).classList.add('active');
+        }
+
+        function updateSpeed(val) {
+            frameDelay = parseInt(val);
+            document.getElementById('speed-val').innerText = val;
+            clearInterval(intervalId);
+            intervalId = setInterval(draw, frameDelay);
+        }
+
+        // UI Auto-hide logic
+        let idleTimer;
+        function wakeUp() {
+            panel.style.opacity = '1';
+            panel.style.pointerEvents = 'auto';
+            document.body.style.cursor = 'default';
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                if(!panel.matches(':hover')) {
+                    panel.style.opacity = '0';
+                    panel.style.pointerEvents = 'none';
+                    document.body.style.cursor = 'none';
+                }
+            }, 3000);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', wakeUp);
+        window.addEventListener('keydown', wakeUp);
+        window.addEventListener('click', wakeUp);
+
+        resizeCanvas();
+        intervalId = setInterval(draw, frameDelay);
+    </script>
+</body>
+</html>
+    </textarea>
+
+    <script>
+        let headerTimer;
+        let currentApp = 'home';
+
+        function loadApp(appId, buttonElement) {
+            currentApp = appId;
+            clearTimeout(headerTimer);
+            
+            // Ensure header is completely visible upon app changes
+            const header = document.querySelector('header');
+            header.classList.remove('retracted');
+
+            // Update Active Button styling
+            document.querySelectorAll('header button').forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to the clicked button
+            if(buttonElement) {
+                buttonElement.classList.add('active');
+                
+                // If the clicked button is inside a dropdown, also highlight the parent dropdown button
+                if (buttonElement.parentElement.classList.contains('dropdown-content')) {
+                    buttonElement.closest('.dropdown').querySelector('.dropbtn').classList.add('active');
+                }
+            } else {
+                // Initial load default logic
+                const defaultBtn = document.getElementById('btn-' + appId);
+                if (defaultBtn) {
+                    defaultBtn.classList.add('active');
+                    if (defaultBtn.parentElement.classList.contains('dropdown-content')) {
+                        defaultBtn.closest('.dropdown').querySelector('.dropbtn').classList.add('active');
+                    }
+                }
+            }
+
+            // Extract the raw HTML from our hidden textarea
+            const htmlContent = document.getElementById('code-' + appId).value;
+            
+            // Inject it into the iframe
+            const frame = document.getElementById('app-frame');
+            frame.srcdoc = htmlContent;
+
+            // Adjust iframe background color based on app 
+            if (appId === 'piano') {
+                frame.style.backgroundColor = '#0c0b18'; 
+            } else if (appId === 'screensaver') {
+                frame.style.backgroundColor = '#000000'; 
+            } else if (appId === 'music') {
+                frame.style.backgroundColor = '#060a06'; 
+            } else if (appId === 'tetris') {
+                frame.style.backgroundColor = '#111111'; // Matches the dark body of Tetris
+            } else {
+                frame.style.backgroundColor = '#121212';
+            }
+
+            // Setup internal tracking once iframe structures map completely
+            frame.onload = function() {
+                if (appId === 'screensaver') {
+                    resetHeaderTimeout();
+                    
+                    // Bind actions to actions occurring *inside* the iframe window environment
+                    frame.contentWindow.addEventListener('mousemove', handleActivity);
+                    frame.contentWindow.addEventListener('keydown', handleActivity);
+                    frame.contentWindow.addEventListener('click', handleActivity);
+                }
+            };
+        }
+
+        // Handles revealing the header and resetting the countdown loop
+        function handleActivity() {
+            if (currentApp !== 'screensaver') return;
+            
+            const header = document.querySelector('header');
+            header.classList.remove('retracted');
+            
+            resetHeaderTimeout();
+        }
+
+        // Counts down 3 seconds before sliding the header upwards smoothly
+        function resetHeaderTimeout() {
+            clearTimeout(headerTimer);
+            if (currentApp === 'screensaver') {
+                headerTimer = setTimeout(() => {
+                    document.querySelector('header').classList.add('retracted');
+                }, 3000);
+            }
+        }
+
+        // Track global layout mouse movements if cursor sweeps over top bar margins
+        window.addEventListener('mousemove', handleActivity);
+        window.addEventListener('keydown', handleActivity);
+
+        // Load the Home screen when the page first opens
+        window.onload = () => loadApp('home');
+    </script>
+</body>
+</html>
